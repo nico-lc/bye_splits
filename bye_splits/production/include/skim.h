@@ -18,6 +18,7 @@ namespace po = boost::program_options;
 using namespace std;
 
 void skim(string, string, string, string, int);
+void skim_tau(string, string, string, string, int);
 
 template <class U>
 auto internal_join_vars(vector<U>& dest, const vector<U>& vec) -> void {

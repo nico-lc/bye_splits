@@ -29,7 +29,7 @@ po::variables_map process_program_options(int argc, char **argv);
 
 void validate(po::variables_map args) {
   std::string particles = args["particles"].as<string>();
-  if(!(particles=="photons" || particles=="electrons" || particles=="pions")) {
+  if(!(particles=="photons" || particles=="electrons" || particles=="pions" || particles=="taus")) {
     throw po::validation_error(po::validation_error::invalid_option_value, "particles");
   }
 }
@@ -75,7 +75,8 @@ po::variables_map process_program_options(int argc, char **argv)
 
 //Run with ./produce.exe photons
 int main(int argc, char **argv) {
-  std::string dir = "/eos/user/b/bfontana/FPGAs/new_algos/";
+  std::string dir = "/data_CMS/cms/alves/L1HGCAL/";
+  std::string outdir = "~/skimmed/";
   std::string tree_name = "FloatingpointMixedbcstcrealsig4DummyHistomaxxydr015GenmatchGenclustersntuple/HGCalTriggerNtuple";
 
   po::variables_map args = process_program_options(argc, argv);
@@ -86,9 +87,18 @@ int main(int argc, char **argv) {
   string particles = args["particles"].as<string>();
   int nevents = args["nevents"].as<int>();
 
+  if (particles == "taus") {
+    dir = "/data_cms_upgrade/sauvan/HGCAL/2303_project-nicolas-lopez/";
+    tree_name = "l1tHGCalTriggerNtuplizer/HGCalTriggerNtuple";
+    std::string infile = "ntuple_DoubleTauEndcapPt30-100_pythia8_0PU_230207.root";
+    std::string events_str = nevents > 0 ? std::to_string(nevents) + "events_" : "";
+    std::string outfile = "skim_" + events_str + infile;
+    skim_tau(tree_name, dir + infile, outdir + outfile, particles, nevents);
+    return 0;
+  }
   std::string infile = particles + "_0PU_bc_stc_hadd.root";
   std::string events_str = nevents > 0 ? std::to_string(nevents) + "events_" : "";
   std::string outfile = "skim_" + events_str + infile;
-  skim(tree_name, dir + infile, dir + outfile, particles, nevents);
+  skim(tree_name, dir + infile, outdir + outfile, particles, nevents);
   return 0;
 }
