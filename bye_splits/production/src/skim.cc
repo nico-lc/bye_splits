@@ -198,25 +198,29 @@ void skim_tau(string tn, string inf, string outf, string particle, int nevents) 
   ROOT::RDataFrame dataframe(tn, inf);
 
   // gen-related variables
+  unordered_map<string, string> oldvars = {
+    {"gentau_decayMode", "gentau_decayMode"},
+    {"genpart_exeta", "gentau_vis_eta"},
+    {"genpart_exphi", "gentau_vis_phi"},
+    {"genpart_energy", "gentau_energy" }
+  };
   vector<string> gen_intv = {"gentau_decayMode"};
-  vector<string> gen_floatv = {"gentau_vis_pt", "gentau_vis_eta", "gentau_vis_phi", "gentau_energy"};
+  vector<string> gen_floatv = {"genpart_exeta", "genpart_exphi", "genpart_energy"};
   vector<string> gen_floatv2 = {};
   vector<string> gen_v = join_vars(gen_intv, gen_floatv, gen_floatv2);
 
-  // selection on eta tolerance (and decay mode?)
-  /* 
-  I would like to filter all events where gentau_vis_eta >= 1.6 && gentau_vis_eta <= 2.9
-  but I cen't find a way to remove the clusters on these events, since the length of the
-  cluster vector is not the same as the length of the gen vector.
-  */
+  // selection on eta tolerance and decay mode?
   string condgen = "gentau_vis_eta > 0";
-  // string condgen = "gentau_vis_eta >= 1.6 && gentau_vis_eta <= 2.9";
-  // condgen += "&& gentau_decayMode != 11 && gentau_decayMode != 13";
+  condgen += "&& gentau_vis_eta >= 1.6 && gentau_vis_eta <= 2.9";
+  condgen += "&& gentau_decayMode != 11 && gentau_decayMode != 13";
   
   auto df = dataframe.Define(vtmp + "_gens", condgen);
   for(auto& v : gen_v) {
-    df = df.Define(vtmp + "_" + v, v + "[" + vtmp + "_gens]");
+    df = df.Define(vtmp + "_" + v, oldvars[v] + "[" + vtmp + "_gens]");
   }
+
+  //remove events with zero generated particles
+  auto dfilt = df.Filter(vtmp + "_gentau_decayMode.size()!=0");
 
   // trigger cell-related variables
   vector<string> tc_uintv = {"tc_cluster_id"};
@@ -227,7 +231,7 @@ void skim_tau(string tn, string inf, string outf, string particle, int nevents) 
 
   // selection on trigger cells (within each event)
   string condtc = "tc_zside == 1 && tc_mipPt > " + mipThreshold;
-  auto dd1 = df.Define(vtmp + "_tcs", condtc);
+  auto dd1 = dfilt.Define(vtmp + "_tcs", condtc);
   for(auto& v : tc_v){
 	  dd1 = dd1.Define(vtmp + "_" + v, v + "[" + vtmp + "_tcs]");
   }
@@ -249,7 +253,7 @@ void skim_tau(string tn, string inf, string outf, string particle, int nevents) 
   vector<string> matchvars = {"deltaR", "matches"};
   string cond_deltaR = matchvars[0] + " <= " + deltarThreshold;
   auto dd2 = dfilt2.Define(matchvars[0], calcDeltaR, 
-                          {vtmp + "_gentau_vis_eta", vtmp + "_gentau_vis_phi", vtmp + "_cl3d_eta", vtmp + "_cl3d_phi"})
+                          {vtmp + "_genpart_exeta", vtmp + "_genpart_exphi", vtmp + "_cl3d_eta", vtmp + "_cl3d_phi"})
                           .Define(matchvars[1], cond_deltaR);
 
   // convert root vector types to vector equivalents (uproot friendly)
