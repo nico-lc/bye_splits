@@ -33,6 +33,7 @@ class GeometryData(BaseData):
         self.indata.path = self.cfg['geometry']['file']
         self.indata.adir = self.cfg['geometry']['dir']
         self.indata.tree = self.cfg['geometry']['tree']
+        self.reprocess = True
 
         self.dataset = None
         self.dname = 'tc'

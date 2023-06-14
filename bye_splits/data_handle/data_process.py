@@ -117,7 +117,7 @@ def get_data_reco_chain_start(nevents=500, reprocess=False, tag='chain', particl
     }
     ds_cl = ds_all["cl"]
     ds_cl = ds_cl.rename(columns=cl_keep)
-
+    print(ds_tc)
     return ds_gen, ds_cl, ds_tc
 
 def EventDataParticle(tag, reprocess, logger=None, debug=False, particles=None):

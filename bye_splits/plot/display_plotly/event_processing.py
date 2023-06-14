@@ -35,7 +35,7 @@ data_particle = {
     'electrons'    : 'electrons',
     'pions'        : 'pions'}
 
-geom_data = GeometryData(reprocess=False, logger=log)
+geom_data = GeometryData(reprocess=True, logger=log)
 
 pars = {'no_fill': False, 'no_smooth': False, 'no_seed': False, 'no_cluster': False, 'no_validation': False, 'sel': 'all', 'reg': 'Si', 'seed_window': 1, 'smooth_kernel': 'default', 'cluster_algo': 'min_distance', 'user': None, 'cluster_studies': False}
 axis = dict(backgroundcolor="rgba(0,0,0,0)", gridcolor="white", showbackground=True, zerolinecolor="white",)
